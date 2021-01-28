@@ -1,84 +1,73 @@
-// 设计第一层意思：
-if (!localStorage.getItem("token")) {
-  location.href = "/login.html";
+// -----------------------进入页面判断token---------------------
+// 1.判断是否有token
+if (localStorage.getItem("token") == null) {
+  location.href = "../login.html";
 }
 
 
-// ----------------------------------------------------请求个人信息
+// -----------------------用户的基本信息---------------------
+// 1.获取用户的基本数据
 $.ajax({
+  type: "get", //不写type默认是get
   url: "http://ajax.frontend.itheima.net/my/userinfo",
-  // 设置请求头：
+
+  // 设置请求头
+  // 请求头里面放的是token信息，用于验证用户身份
   headers: {
-    "Authorization": localStorage.getItem("token"),
+    // token已经存在本地了，可以直接获取本地token信息
+    Authorization: localStorage.getItem("token")
   },
-  // 请求成功后调用
-  success: function(res) {
-    // console.log(res);
+  // success只有请求成功后会调用
+  // res是响应的数据
+  success: function (res) {
     if (res.status == 0) {
-      // 名称：有昵称就昵称、不然就是用户名；
+      // 名称，有昵称就设置昵称，没有就就用户名
       var name = res.data.nickname || res.data.username;
       $(".username").text(name);
 
-      // 测试代码：
-      // res.data.user_pic = undefined;
-      // name = "aaa";
-
-      // 头像：如果有头像数据
-      if (res.data.user_pic) {
-        // 
-        $(".layui-nav-img").show().attr("src", res.data.user_pic);
+      // 头像，有图片使用图片，没有就用名称的首字母
+      //    如果有图片
+      if (res.data.user_pic != undefined) {
+        $(".layui-nav-img").show().prop("src", res.data.user_pic);
         $(".avatar").hide();
-      }
-      // 测试：没有头像数据的时候
-      else {
-        // 截取name名字上第一个字符；
-        var t = name.substr(0, 1);
-        // 英文字符：小写变为大写：字符串.toUpperCase()
-        t = t.toUpperCase();
+      } else {
+        // 截取名称的第一个字符
+        // 英文字符的小写变成大写
+        // 字符串.toUpperCase()
+        var first_name = name.substr(0, 1).toUpperCase();
 
-        // show:会让元素变为行内元素；
-        $(".avatar").show().css("display", "inline-block").text(t);
-        $(".layui-nav-img").hide()
+        // 显示
+        $(".avatar").show().css("display", "inline-block").text(first_name);
+        $(".layui-nav-img").hide();
       }
-
     }
   },
-  // 请求失败后调用
-  fail: function() {},
-  // 完成：不管成功还是失败，都会执行这个函数；
-  complete: function(xhr) {
-    // xhr: 经过JQ封装后，xhr对象；
-    // 原生xhr 找出返回的数据： xhr.reponseText;
-    // xhr.responseJSON
-    // console.log(xhr.responseJSON, 11111111111111);
-    if (xhr.responseJSON.status == 1 || xhr.responseJSON.message == "身份认证失败！") {
-      // 比较好的方式：就是清空
-      localStorage.removeItem("token");
-      location.href = "/login.html";
-    }
-
+  // fail是请求失败的时候调用
+  fail:function () {  },
+  // complete不管请求是否成功都会执行调用
+  // xhr是一个JQ封装后的xhr对象
+  complete: function (xhr) { 
+    // xhr.responseJSON  就是返回的数据
+    if (xhr.responseJSON.status === 1 && xhr.responseJSON.message === '身份认证失败！') {
+        
+      // 删除 过期 token
+      localStorage.removeItem('token');
+      // 跳转到登录页面
+      location.href = '/login.html';
   }
-})
+   }
+});
 
-
-
-// ----------------------------------------------------------退出
-//   1.点击退出
-//   2.优化：弹窗  问问是否退出？
-//   3.是：
-//      页面回到 login
-//      token：本地清空;
-$("#logout").on("click", function() {
-  layer.confirm('您确认忍心退出么？', {
-    icon: 3,
-    title: '退出窗口'
-  }, function(index) {
-
-    // 清空本地token
-    localStorage.removeItem("token");
-    location.href = "/login.html";
-
-    // index: number值  用户关闭窗口！
-    layer.close(index);
+// -----------------------退出按钮功能---------------------
+// - 点击退出按钮，询问用户确认要退出；
+// - 点击确定，返回登录页，清空token值；
+$("#logout").on("click", function () {
+  //  layui弹出层，确认是否退出
+  layer.confirm("确认是否退出", { icon: 3, title: "退出当前页面" }, function (index) {
+    // index-当前窗口的ID值，用于关闭窗口
+    // 如果点击了确定，删除token，页面跳转
+    localStorage.removeItem("token"); //清除指定名称的本地内容
+    location.href = "../login.html";
+    layer.close(index); // 关闭当前弹出层
   });
 });
