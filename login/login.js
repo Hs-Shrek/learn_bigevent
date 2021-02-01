@@ -49,7 +49,7 @@ $("#register .layui-form").on("submit", function (e) {
   // 发出请求
   $.ajax({
     type: "post",
-    url: "http://ajax.frontend.itheima.net/api/reguser",
+    url: "/api/reguser",
     data: params,
     success: function (res) {
       // res.message是注册是否成功返回的信息
@@ -103,7 +103,7 @@ $("#login .layui-form").on("submit", function (e) {
   // 发生数据
   $.ajax({
     type: "POST",
-    url: "http://ajax.frontend.itheima.net/api/login",
+    url: "/api/login",
     data: data,
     success: function (res) {
       // 弹窗：msg 简单弹窗、会自动消失；
@@ -113,9 +113,9 @@ $("#login .layui-form").on("submit", function (e) {
         // 把token保存到本地存储
         localStorage.setItem("token", res.token);
 
-        //
-        location.href = "../index.html";
-      }
+        //页面跳转
+        location.href = "/index.html";
+      } 
     }
   });
 });
