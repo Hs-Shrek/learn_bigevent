@@ -108,14 +108,13 @@ $("#login .layui-form").on("submit", function (e) {
     success: function (res) {
       // 弹窗：msg 简单弹窗、会自动消失；
       layer.msg(res.message);
-
       if (res.status == 0) {
         // 把token保存到本地存储
         localStorage.setItem("token", res.token);
 
         //页面跳转
         location.href = "/index.html";
-      } 
+      }
     }
   });
 });
