@@ -41,9 +41,9 @@ function get_list() {
                     <td>${ele.state}</td>
                     <th>
                       <!-- 编辑按钮 -->
-                      <a href="/article/edit.html?id=${ele.Id}" class="layui-btn layui-btn-xs">编辑</a>
+                      <a href="/article/edit/edit.html?id=${ele.Id}" class="layui-btn layui-btn-xs">编辑</a>
                       <!-- 删除按钮 -->
-                      <button data-id="${ele.Id}" type="button" class="layui-btn layui-btn-xs layui-btn-danger">删除</button>
+                      <button delid="${ele.Id}" type="button" class="layui-btn layui-btn-xs layui-btn-danger del">删除</button>
                     </th>
                   </tr>`;
         });
@@ -96,7 +96,6 @@ function getPage(total) {
   });
 }
 
-
 // ---------------------------------------筛选
 // 点击筛选 拿到两个数据值
 //    1. 分类值   2. 发布状态值
@@ -107,13 +106,37 @@ $(".search").on("submit", function (e) {
   e.preventDefault();
   //  收集数据 ，分类和状态
   // var parmas = $(this).serialize(); //获取的是ID和status的字符串
-  
-  var parmas = $(this).serializeArray();//返回的是 数组对象，不能直接做参数传入
+
+  var parmas = $(this).serializeArray(); //返回的是 数组对象，不能直接做参数传入
 
   //  把分类和状态设置到全局的data上 ，形成新的data
   data.cate_id = parmas[0].value;
-  data.state = parmas[1].value
+  data.state = parmas[1].value;
+  // 产品设计 ： 如果用户要查询分类，默认从第一页开始看
+  data.pagenum = 1;
 
+  // 调用
+  get_list();
+});
 
+// ---------------------------------------删除
+// 事件委托注册事件
+$("tbody").on("click", ".del", function (e) {
+  // 获取id值
+  var id = $(e.target).attr("delid");
 
-  })
+  // 询问是否删除
+  layer.confirm("是否要删除？", function (index) {
+    // 请求删除
+    $.ajax({
+      url: "/my/article/delete/" + id,
+      success: function (res) {
+        layer.msg(res.message);
+        if (res.status === 0) {
+          get_list();
+          layer.close(index);
+        }
+      }
+    });
+  });
+});
